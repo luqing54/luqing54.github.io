@@ -10,68 +10,72 @@
 <body>
 
 <script type="text/javascript">
-    var path='home';
-    var  index=0;
+    var path='home';                          //path store init
+    var  index=0;                             //current path flag
 
-     //controller
+    //controller
     Ext.define('MyViewController', {
         extend : 'Ext.app.ViewController',
         alias: 'controller.mycontroller',
-        prebackpath:function(btn){
-            if (index>=2){
-           var pathArr=path.split('/');
-            Ext.getCmp('btn2').enable();
-            index=index-1;
-            var  path_previous=pathArr[index];
-            console.log("you click back button then jump:"+path_previous);
-           if( path_previous.indexOf("-") !=-1){
-                var  idArr=path_previous.split('-'),
-                        arrDeep=idArr.length ;
-                    Ext.getCmp('home').setActiveItem(idArr[0]);
-                    Ext.getCmp(idArr[0]).setActiveItem(path_previous);
-            }
-            else
-            {  Ext.getCmp('home').setActiveItem(path_previous);}
 
-            }
-            if(index<2){Ext.getCmp('btn1').disable();}
+        //home button handler (back or next)
+        homebuttonclick:function(btn){
+            var stext=btn.text;
+            if (index>=1){
+               var pathArr=path.split('/');        //path store invert to path array
+                if(btn.text=="Back") {
+                    index=index-1;                 // current path flag -1
+                    Ext.getCmp('btn2').enable();   //next button enable
+                    console.log("you click back button then jump:");
+                }
+                else{
+                    index=index+1;                // current path flag +1
+                    Ext.getCmp('btn1').enable();  //back button enable
+                    console.log("you click next button then jump:");
+                }
 
-        },
-        connextpath:function(){
-          var pathArr=path.split('/');
-            if(index<=pathArr.length-2){
-                index=index+1;
-                Ext.getCmp('btn1').enable();
-                var  path_next=pathArr[index];
-                console.log("you click next button then jump:"+path_next);
-                if( path_next.indexOf("-") !=-1){
-                    var  idArr=path_next.split('-'),
-                            arrDeep=idArr.length ;
+                //jump to otherpath according to which button you click(back or next)
+                var  path_jump=pathArr[index];
+                if( path_jump.indexOf("-") !=-1){
+                    var  idArr=path_jump.split('-'); // arrDeep=idArr.length;(Nested multilayer available)
                     Ext.getCmp('home').setActiveItem(idArr[0]);
-                    Ext.getCmp(idArr[0]).setActiveItem(path_next);
+                    Ext.getCmp(idArr[0]).setActiveItem(path_jump);
                 }
                 else
-                {  Ext.getCmp('home').setActiveItem(path_next);}
+                {
+                    Ext.getCmp('home').setActiveItem(path_jump);
+                }
+                console.log(path_jump+"  index:" +index);
             }
 
-            if(index>pathArr.length-2){Ext.getCmp('btn2').disable();}
+            //setting homebutton disable
+            if(index<=1){
+                Ext.getCmp('btn1').disable();}
+            if(index>=pathArr.length-1){
+                Ext.getCmp('btn2').disable();}
+
         },
-        buttonclick1: function(btn) {
-            var pathArr=path.split('/');
+
+        // Top and Left Toolbar  button handler
+         toolbarbuttonclick: function(btn) {
             var stext=btn.text;
-            path=path+"/"+stext;
-            index= pathArr.length;
+            path=path+"/"+stext;                 //add current path to path store
+            var pathArr=path.split('/');         //path store invert to path array
+            index= pathArr.length-1;              // current path to array end
             console.log("current path store:"+path+"  index:"+index);
-            if (index>=2){ Ext.getCmp('btn1').enable();}
+            if (index>=1){
+                Ext.getCmp('btn1').enable();}    // back button enable
             main=btn.up("panel");
             main.setActiveItem(stext);
+
+            //add html to panel
             if(main.getTitle()){
                 Ext.getCmp(stext).update("The html code procudes display as"+" <br/>"+main.getTitle()+"<br/>"+stext);
             }
             else{
                 Ext.getCmp(stext).update("The html code procudes display as"+"<br/>"+stext);
             }
-        }
+          }
     });
 
     //view
@@ -87,43 +91,53 @@
         defults:{
             frame:true
         },
+        //Left Toolbar
         lbar:[
             {
-                text: 'second-meau1',
-                handler: 'buttonclick1'
+                text: 'second-meau1', //Toolbar button
+                handler: 'toolbarbuttonclick'
             } ,
             {
-                text:'second-meau2',
-                handler: 'buttonclick1'
+                text:'second-meau2', //Toolbar button
+                handler: 'toolbarbuttonclick'
             }
         ] ,
         items:[{id:'second-meau1',html:"The meau1"},{ id:'second-meau2',html:"The meau2"}]
     }) ;
+
+    //home  button
+      // back button
     var myBackButton=Ext.create("Ext.Button", {
         id:'btn1',
         text:"Back",
-        handler:'prebackpath'
+        handler:'homebuttonclick'
     });
+      // Forward button
     var myForwardButton=Ext.create("Ext.Button", {
         id:'btn2',
         text:"Next",
-        handler:'connextpath'
+        handler:'homebuttonclick'
     });
+
+    //main panel
     var myTapPanel=Ext.create('Ext.Panel', {
         controller: 'mycontroller',
         layout:'card',
         id:'home',
-        tbar:[  myBackButton,
-                myForwardButton,
+
+        //Top Toolbar
+        tbar:[
+            myBackButton,     // home back button
+            myForwardButton, // home Forward button
             "->",
             {
-                text: 'first',
-                handler: 'buttonclick1'
+                text: 'first',//Toolbar button
+                handler: 'toolbarbuttonclick'
             } ,
 
             {
-                text:'second',
-                handler: 'buttonclick1'
+                text:'second',//Toolbar button
+                handler: 'toolbarbuttonclick'
             }
         ],
         items:[firstPanel,secondPanel]
@@ -131,11 +145,13 @@
 
 
     Ext.onReady(function() {
-
+        //main viewport
         Ext.create("Ext.Viewport", {
             layout:"fit",
             items: myTapPanel
         });
+
+        //button initial status
         Ext.getCmp('btn1').disable();
         Ext.getCmp('btn2').disable();
     })
