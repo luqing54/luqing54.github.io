@@ -19,24 +19,30 @@
         alias: 'controller.mycontroller',
         prebackpath:function(btn){
             if (index>=2){
-      //      var pathArr=path.split('/');
-            var  path_previous=pathArr[index-1];
+           var pathArr=path.split('/');
+            Ext.getCmp('btn2').enable();
+            index=index-1;
+            var  path_previous=pathArr[index];
             console.log("you click back button then jump:"+path_previous);
            if( path_previous.indexOf("-") !=-1){
-            var  idArr=path_previous.split('-'),
-                    arrDeep=idArr.length ;
-                Ext.getCmp('home').setActiveItem(idArr[0]);
-                Ext.getCmp(idArr[0]).setActiveItem(path_previous);
+                var  idArr=path_previous.split('-'),
+                        arrDeep=idArr.length ;
+                    Ext.getCmp('home').setActiveItem(idArr[0]);
+                    Ext.getCmp(idArr[0]).setActiveItem(path_previous);
             }
             else
             {  Ext.getCmp('home').setActiveItem(path_previous);}
-            index=index-1;
+
             }
+            if(index<2){Ext.getCmp('btn1').disable();}
+
         },
         connextpath:function(){
-         //   var pathArr=path.split('/');
-            if(index<pathArr.length-1){
-                var  path_next=pathArr[index+1];
+          var pathArr=path.split('/');
+            if(index<=pathArr.length-2){
+                index=index+1;
+                Ext.getCmp('btn1').enable();
+                var  path_next=pathArr[index];
                 console.log("you click next button then jump:"+path_next);
                 if( path_next.indexOf("-") !=-1){
                     var  idArr=path_next.split('-'),
@@ -46,15 +52,17 @@
                 }
                 else
                 {  Ext.getCmp('home').setActiveItem(path_next);}
-                index=index+1;
             }
+
+            if(index>pathArr.length-2){Ext.getCmp('btn2').disable();}
         },
         buttonclick1: function(btn) {
-            pathArr=path.split('/');
+            var pathArr=path.split('/');
             var stext=btn.text;
             path=path+"/"+stext;
             index= pathArr.length;
             console.log("current path store:"+path+"  index:"+index);
+            if (index>=2){ Ext.getCmp('btn1').enable();}
             main=btn.up("panel");
             main.setActiveItem(stext);
             if(main.getTitle()){
@@ -92,12 +100,12 @@
         items:[{id:'second-meau1',html:"The meau1"},{ id:'second-meau2',html:"The meau2"}]
     }) ;
     var myBackButton=Ext.create("Ext.Button", {
-        extent:'',
+        id:'btn1',
         text:"Back",
         handler:'prebackpath'
     });
     var myForwardButton=Ext.create("Ext.Button", {
-        extent:'',
+        id:'btn2',
         text:"Next",
         handler:'connextpath'
     });
@@ -128,6 +136,8 @@
             layout:"fit",
             items: myTapPanel
         });
+        Ext.getCmp('btn1').disable();
+        Ext.getCmp('btn2').disable();
     })
 </script>
 </body>
