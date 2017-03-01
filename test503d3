@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>ExtJs components/layout route</title>
+    <script type="text/javascript" src="../ext-all.js"></script>
+    <link href="../ext-theme-neptune-all.css" rel="stylesheet" type="text/css" >
+</head>
+<body>
+
+<script type="text/javascript">
+    var path='home';
+    var  index=0;
+
+     //controller
+    Ext.define('MyViewController', {
+        extend : 'Ext.app.ViewController',
+        alias: 'controller.mycontroller',
+        prebackpath:function(btn){
+            if (index>=2){
+      //      var pathArr=path.split('/');
+            var  path_previous=pathArr[index-1];
+            console.log("you click back button then jump:"+path_previous);
+           if( path_previous.indexOf("-") !=-1){
+            var  idArr=path_previous.split('-'),
+                    arrDeep=idArr.length ;
+                Ext.getCmp('home').setActiveItem(idArr[0]);
+                Ext.getCmp(idArr[0]).setActiveItem(path_previous);
+            }
+            else
+            {  Ext.getCmp('home').setActiveItem(path_previous);}
+            index=index-1;
+            }
+        },
+        connextpath:function(){
+         //   var pathArr=path.split('/');
+            if(index<pathArr.length-1){
+                var  path_next=pathArr[index+1];
+                console.log("you click next button then jump:"+path_next);
+                if( path_next.indexOf("-") !=-1){
+                    var  idArr=path_next.split('-'),
+                            arrDeep=idArr.length ;
+                    Ext.getCmp('home').setActiveItem(idArr[0]);
+                    Ext.getCmp(idArr[0]).setActiveItem(path_next);
+                }
+                else
+                {  Ext.getCmp('home').setActiveItem(path_next);}
+                index=index+1;
+            }
+        },
+        buttonclick1: function(btn) {
+            pathArr=path.split('/');
+            var stext=btn.text;
+            path=path+"/"+stext;
+            index= pathArr.length;
+            console.log("current path store:"+path+"  index:"+index);
+            main=btn.up("panel");
+            main.setActiveItem(stext);
+            if(main.getTitle()){
+                Ext.getCmp(stext).update("The html code procudes display as"+" <br/>"+main.getTitle()+"<br/>"+stext);
+            }
+            else{
+                Ext.getCmp(stext).update("The html code procudes display as"+"<br/>"+stext);
+            }
+        }
+    });
+
+    //view
+
+    var firstPanel=Ext.create('Ext.Panel',{
+        id:'first',
+        html:'The first content'
+    }) ;
+    var secondPanel=Ext.create('Ext.Panel',{
+        id:'second',
+        layout:'card',
+        title:'The second content',
+        defults:{
+            frame:true
+        },
+        lbar:[
+            {
+                text: 'second-meau1',
+                handler: 'buttonclick1'
+            } ,
+            {
+                text:'second-meau2',
+                handler: 'buttonclick1'
+            }
+        ] ,
+        items:[{id:'second-meau1',html:"The meau1"},{ id:'second-meau2',html:"The meau2"}]
+    }) ;
+    var myBackButton=Ext.create("Ext.Button", {
+        extent:'',
+        text:"Back",
+        handler:'prebackpath'
+    });
+    var myForwardButton=Ext.create("Ext.Button", {
+        extent:'',
+        text:"Next",
+        handler:'connextpath'
+    });
+    var myTapPanel=Ext.create('Ext.Panel', {
+        controller: 'mycontroller',
+        layout:'card',
+        id:'home',
+        tbar:[  myBackButton,
+                myForwardButton,
+            "->",
+            {
+                text: 'first',
+                handler: 'buttonclick1'
+            } ,
+
+            {
+                text:'second',
+                handler: 'buttonclick1'
+            }
+        ],
+        items:[firstPanel,secondPanel]
+    });
+
+
+    Ext.onReady(function() {
+
+        Ext.create("Ext.Viewport", {
+            layout:"fit",
+            items: myTapPanel
+        });
+    })
+</script>
+</body>
+</html>
